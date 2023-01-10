@@ -30,17 +30,24 @@ class MainActivity : AppCompatActivity() {
                     .build()
 
             picker.addOnPositiveButtonClickListener {
-                val calendar = Calendar.getInstance()
+                val calendar = Calendar.getInstance() // текущее время
                 calendar.set(Calendar.SECOND, 0)
                 calendar.set(Calendar.MILLISECOND, 0)
                 calendar.set(Calendar.MINUTE, picker.minute)
                 calendar.set(Calendar.HOUR_OF_DAY, picker.hour)
 
                 val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-                val alarmClockInfo =
-                    AlarmManager.AlarmClockInfo(calendar.timeInMillis, getAlarmInfoPendingIntent())
+                /*val alarmClockInfo =
+                    AlarmManager.AlarmClockInfo(calendar.timeInMillis, getAlarmInfoPendingIntent())*/
 
-                alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPendingIntent())
+                val intent = AlarmReceiver.newIntent(this)
+                val pendingIntent = PendingIntent.getBroadcast(this, 11, intent, 0)
+
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
 
                 Toast.makeText(this, "Будильник установлен", Toast.LENGTH_SHORT).show()
             }
@@ -48,17 +55,15 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
+/*
     private fun getAlarmInfoPendingIntent(): PendingIntent {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
-
     private fun getAlarmActionPendingIntent(): PendingIntent {
         val intent = Intent(this, AlarmActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         return PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
-
+    }*/
 }
