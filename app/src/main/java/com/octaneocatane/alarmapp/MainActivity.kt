@@ -1,9 +1,12 @@
 package com.octaneocatane.alarmapp
 
 import android.app.AlarmManager
+import android.app.AlarmManager.AlarmClockInfo
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -11,14 +14,18 @@ import com.google.android.material.timepicker.TimeFormat
 import com.octaneocatane.alarmapp.databinding.ActivityMainBinding
 import java.util.*
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var requestCode = 0
 
     override fun onCreate(s: Bundle?) {
         super.onCreate(s)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        checkOverlayPermission()
 
         binding.buttonSetAlarm.setOnClickListener {
             val picker =
@@ -37,33 +44,30 @@ class MainActivity : AppCompatActivity() {
                 calendar.set(Calendar.HOUR_OF_DAY, picker.hour)
 
                 val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-                /*val alarmClockInfo =
-                    AlarmManager.AlarmClockInfo(calendar.timeInMillis, getAlarmInfoPendingIntent())*/
 
-                val intent = AlarmReceiver.newIntent(this)
-                val pendingIntent = PendingIntent.getBroadcast(this, 11, intent, 0)
-
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
+                val alarmClockInfo = AlarmClockInfo(calendar.timeInMillis, getAlarmInfoPendingIntent(requestCode++))
+                alarmManager.setAlarmClock(alarmClockInfo, getAlarmActionPendingIntent(requestCode++))
 
                 Toast.makeText(this, "Будильник установлен", Toast.LENGTH_SHORT).show()
             }
             picker.show(supportFragmentManager, "tag_picker")
         }
-
     }
-/*
-    private fun getAlarmInfoPendingIntent(): PendingIntent {
+
+    private fun checkOverlayPermission() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse(
+            "package:$packageName"))
+        startActivityForResult(intent, 0)
+    }
+
+    private fun getAlarmInfoPendingIntent(requestCode: Int): PendingIntent {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
-    private fun getAlarmActionPendingIntent(): PendingIntent {
+    private fun getAlarmActionPendingIntent(requestCode: Int): PendingIntent {
         val intent = Intent(this, AlarmActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        return PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }*/
+        return PendingIntent.getActivity(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
 }

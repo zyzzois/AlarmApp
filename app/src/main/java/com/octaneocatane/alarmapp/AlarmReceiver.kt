@@ -2,6 +2,7 @@ package com.octaneocatane.alarmapp
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,21 +14,37 @@ class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         context?.let {
-            val notificationManager = getSystemService(
-                it,
-                NotificationManager::class.java
-            ) as NotificationManager
-
-            createNotificationChannel(notificationManager)
-
-            val notification = NotificationCompat.Builder(it, CHANNEL_ID)
-                .setContentTitle("Title")
-                .setContentText("Text")
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .build()
-
-            notificationManager.notify(NOTIFICATION_ID, notification)
+            showNotification(it)
+            showActivity(it)
         }
+    }
+
+    private fun showActivity(context: Context) {
+        val intent = Intent(context, AlarmActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(context, 11, intent, 0)
+
+    }
+
+    private fun showNotification(it: Context) {
+        val intent = Intent(it, AlarmActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(it, 0, intent, 0)
+
+        val notificationManager = getSystemService(
+            it,
+            NotificationManager::class.java
+        ) as NotificationManager
+
+        createNotificationChannel(notificationManager)
+
+        val notification = NotificationCompat.Builder(it, CHANNEL_ID)
+            .setContentTitle("Title")
+            .setContentText("Text")
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun createNotificationChannel(notificationManager: NotificationManager) {
