@@ -8,5 +8,5 @@ interface AlarmRepository {
     fun addAlarmUseCase(alarm: AlarmEntity)
     fun deleteAlarmUseCase(alarm: AlarmEntity)
     fun editAlarmUseCase(alarm: AlarmEntity)
-    fun getAlarm(alarmId: Int): AlarmEntity
+    fun getAlarmUseCase(alarmId: Int): AlarmEntity
 }
